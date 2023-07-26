@@ -93,4 +93,40 @@ mean=X.mean()
 print("The mean of our distribution is {} and the standard deviation is {}".format(mean, std))
 
 
+within_one=[i for i in X if ((i>=(mean-std))&(i<=(mean+std)))]
+print(within_one)
+print("The size is {}".format(len(within_one)))
+print("{}% of the values are within one standard deviation of the mean.".format(round(100*len(within_one)/NUMBER_OF_TESTS,2)))
+
+within_two=[i for i in X if ((i>=(mean-2*std))&(i<=(mean+2*std)))]
+print(within_two)
+print("The size is {}".format(len(within_two)))
+print("{}% of the values are within two standard deviations of the mean.".format(round(100*len(within_two)/NUMBER_OF_TESTS,2)))
+
+within_three=[i for i in X if ((i>=(mean-3*std))&(i<=(mean+3*std)))]
+print(within_three)
+print("The size is {}".format(len(within_three)))
+print("{}% of the values are within three standard deviations of the mean.".format(round(100*len(within_three)/NUMBER_OF_TESTS,2)))
+
+
+
+# Now suppose we want to see how increasing the test size effects the percent of sixes rolled.
+df = pd.DataFrame({'Test Size':[i+1 for i in range(NUMBER_OF_TESTS)]})
+print(df)
+df['Sixes']=[count_sixes(i) for i in df['Test Size']]
+print(df)
+df['Percent']=round(df['Sixes']/df['Test Number'],4)
+print(df)
+print(df['Percent'].describe())
+
+plt.figure(figsize=(8,6))
+sns.lineplot(data=df,x='Test Size',y='Percent')
+plt.show(block=False)
+
+# If I want to turn the y axis to percentages.
+plt.figure(figsize=(8,6))
+sns.lineplot(data=df,x='Test Size',y='Percent')
+plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0))
+plt.show()
+
 
