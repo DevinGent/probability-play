@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.ticker as mtick
+import time
 
 # We will manually create a binomial distribution (corresponding to the number of sixes rolled when rolling a fair die n times)
 # and compare the result to the binomial distribution provided by numpy.
@@ -114,12 +115,15 @@ X = np.array([count_sixes(TEST_SIZE) for i in range(NUMBER_OF_TESTS)])
 # Now we want to see how increasing the TEST_SIZE or NUMBER_OF_TESTS effects the resulting distribution.
 # We will define an array of distributions, [X_0, X_1, X_2, X_3, X_4...,X_n], where each distribution has 
 # the same TEST_SIZE=100 but an increasing NUMBER_OF_TESTS. 
-
+print("We now consider the case where the test size is fixed, but the number of tests varies.")
 # The following code snippet takes an extended time to execute.
+print("Please wait as the code executes.  It may take a while.")
+start=time.time()
 distributions=[]
 for ntests in range(50,5001,50):
     distributions.append(np.array([count_sixes(test_size=100) for i in range(ntests)]))
-
+stop=time.time()
+print("Generating the distributions took {} seconds".format(stop-start))
 # We test that the elements are distributions.
 print(distributions[1])
 
@@ -143,9 +147,9 @@ plt.show()
 
 plt.figure(figsize=(10,8))
 plt.subplot(2,2,1)
-l1=sns.kdeplot(distributions[0])
-l2=sns.kdeplot(np.random.binomial(100,1/6,50))
-l3=sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[0].std(),size=50))
+l1=sns.kdeplot(distributions[0], label='Constructed')
+l2=sns.kdeplot(np.random.binomial(100,1/6,50), label='Binomial')
+l3=sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[0].std(),size=50),label='Normal')
 plt.gca().set_title("50 tests")
 plt.subplot(2,2,2)
 sns.kdeplot(distributions[1])
@@ -162,7 +166,7 @@ sns.kdeplot(distributions[99])
 sns.kdeplot(np.random.binomial(100,1/6,5000))
 sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[99].std(),size=5000))
 plt.gca().set_title("5000 tests")
-plt.gcf().legend([l1,l2,l3], labels=['Constructed','Binomial','Normal'])
+plt.gcf().legend([l1,l2,l3],labels=['Constructed', 'Binomial', 'Normal'])
 plt.show()
 
 
@@ -199,6 +203,37 @@ plt.gca().set_title('Interquartile Range')
 plt.tight_layout()
 plt.show()
 
+##############################################################################
+# Above we considered the case where the number of rolls per test (the TEST_SIZE) was fixed at 100
+# and the number of tests increased.  Now let us consider the case where the test size varies, but the
+# total number of tests is NUMBER_OF_TESTS=1000.  That is, each distribution is of size 1000.
+# We make one change to our approach so far.  Instead of counting how MANY 6s there were over N rolls,
+# we will now return what PERCENT of the N rolls came out as 6.
+print("We now consider the case where the number of rolls per test varies, but the total number of tests is always 1000.")
+print("Please wait as the code executes.  It may take a while.")
+start=time.time()
+distributions=[]
+for test_size in range(10,1001,10):
+    distributions.append(np.array([count_sixes(test_size)/test_size for i in range(1000)]))
+stop=time.time()
+print("Generating the distributions took {} seconds".format(stop-start))
+# How do different test sizes compare?
+plt.figure(figsize=(10,8))
+ax1=plt.subplot(2,2,1)
+sns.kdeplot(distributions[0])
+ax1.set_title("10 rolls per test")
+ax1.set_xlim(0,1)
+ax1.set_ylim(0,3)
+plt.subplot(2,2,2)
+sns.kdeplot(distributions[9])
+plt.gca().set_title("100 rolls per test")
+plt.subplot(2,2,3)
+sns.kdeplot(distributions[49])
+plt.gca().set_title("500 rolls per test")
+plt.subplot(2,2,4)
+sns.kdeplot(distributions[99])
+plt.gca().set_title("1000 rolls per test")
+plt.show()
 
 """
 plt.figure(figsize=(8,6))
