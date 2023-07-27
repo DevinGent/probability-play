@@ -1,9 +1,6 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import scipy.stats as st
-import math
 import matplotlib.ticker as mtick
 
 # We will manually create a binomial distribution (corresponding to the number of sixes rolled when rolling a fair die n times)
@@ -35,10 +32,10 @@ print("There were {} sixes rolled in 10 attempts.".format(successes))
 
 
 
-TEST_SIZE = 1000
+TEST_SIZE = 100
 # How many times the dice are rolled in each test.  
 
-NUMBER_OF_TESTS =100 
+NUMBER_OF_TESTS =1000 
 # This gives how many large the distribution is, i.e., how many times the test of rolling a die n times is performed.
 
 print("In each test a die will be rolled {} times, and the number of sixes rolled will be recorded.".format(TEST_SIZE))
@@ -108,17 +105,102 @@ print(within_three)
 print("The size is {}".format(len(within_three)))
 print("{}% of the values are within three standard deviations of the mean.".format(round(100*len(within_three)/NUMBER_OF_TESTS,2)))
 
+#####################################################################################################
+# In the construction of X using the code
+"""
+X = np.array([count_sixes(TEST_SIZE) for i in range(NUMBER_OF_TESTS)])
+"""
+# we created a distribution which depended on the TEST_SIZE, the NUMBER_OF_TESTS, and an element of randomness. 
+# Now we want to see how increasing the TEST_SIZE or NUMBER_OF_TESTS effects the resulting distribution.
+# We will define an array of distributions, [X_0, X_1, X_2, X_3, X_4...,X_n], where each distribution has 
+# the same TEST_SIZE=100 but an increasing NUMBER_OF_TESTS. 
+
+# The following code snippet takes an extended time to execute.
+distributions=[]
+for ntests in range(50,5001,50):
+    distributions.append(np.array([count_sixes(test_size=100) for i in range(ntests)]))
+
+# We test that the elements are distributions.
+print(distributions[1])
+
+# How do different distribution sizes compare?
+plt.figure(figsize=(10,8))
+plt.subplot(2,2,1)
+sns.kdeplot(distributions[0])
+plt.gca().set_title("50 tests")
+plt.subplot(2,2,2)
+sns.kdeplot(distributions[1])
+plt.gca().set_title("100 tests")
+plt.subplot(2,2,3)
+sns.kdeplot(distributions[19])
+plt.gca().set_title("1000 tests")
+plt.subplot(2,2,4)
+sns.kdeplot(distributions[99])
+plt.gca().set_title("5000 tests")
+plt.show()
+
+# Let's compare this with the binomial and normal distributuon.
+
+plt.figure(figsize=(10,8))
+plt.subplot(2,2,1)
+l1=sns.kdeplot(distributions[0])
+l2=sns.kdeplot(np.random.binomial(100,1/6,50))
+l3=sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[0].std(),size=50))
+plt.gca().set_title("50 tests")
+plt.subplot(2,2,2)
+sns.kdeplot(distributions[1])
+sns.kdeplot(np.random.binomial(100,1/6,100))
+sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[1].std(),size=100))
+plt.gca().set_title("100 tests")
+plt.subplot(2,2,3)
+sns.kdeplot(distributions[19])
+sns.kdeplot(np.random.binomial(100,1/6,1000))
+sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[19].std(),size=1000))
+plt.gca().set_title("1000 tests")
+plt.subplot(2,2,4)
+sns.kdeplot(distributions[99])
+sns.kdeplot(np.random.binomial(100,1/6,5000))
+sns.kdeplot(np.random.normal(loc=100/6,scale=distributions[99].std(),size=5000))
+plt.gca().set_title("5000 tests")
+plt.gcf().legend([l1,l2,l3], labels=['Constructed','Binomial','Normal'])
+plt.show()
 
 
-# Now suppose we want to see how increasing the test size effects the percent of sixes rolled.
-df = pd.DataFrame({'Test Size':[i+1 for i in range(NUMBER_OF_TESTS)]})
-print(df)
-df['Sixes']=[count_sixes(i) for i in df['Test Size']]
-print(df)
-df['Percent']=round(df['Sixes']/df['Test Number'],4)
-print(df)
-print(df['Percent'].describe())
 
+
+
+
+
+# Let's examine how the mean, standard deviation, median, and interquartile range are affected. 
+plt.figure(figsize=(14,10))
+plt.subplot(2,2,1)
+sns.lineplot(x=[len(dis) for dis in distributions],y=[dis.mean() for dis in distributions])
+plt.xlabel('Distribution Size')
+plt.ylabel('Mean')
+plt.gca().set_title('Mean')
+
+plt.subplot(2,2,2)
+sns.lineplot(x=[len(dis) for dis in distributions],y=[dis.std() for dis in distributions])
+plt.xlabel('Distribution Size')
+plt.ylabel('Standard Deviation')
+plt.gca().set_title('Standard Deviation')
+
+plt.subplot(2,2,3)
+sns.lineplot(x=[len(dis) for dis in distributions],y=[np.median(dis) for dis in distributions])
+plt.xlabel('Distribution Size')
+plt.ylabel('Median')
+plt.gca().set_title('Median')
+
+plt.subplot(2,2,4)
+sns.lineplot(x=[len(dis) for dis in distributions],y=[np.quantile(dis,.75)-np.quantile(dis,.25) for dis in distributions])
+plt.xlabel('Distribution Size')
+plt.ylabel('IQR')
+plt.gca().set_title('Interquartile Range')
+plt.tight_layout()
+plt.show()
+
+
+"""
 plt.figure(figsize=(8,6))
 sns.lineplot(data=df,x='Test Size',y='Percent')
 plt.show(block=False)
@@ -128,5 +210,5 @@ plt.figure(figsize=(8,6))
 sns.lineplot(data=df,x='Test Size',y='Percent')
 plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0))
 plt.show()
-
+"""
 
