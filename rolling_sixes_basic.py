@@ -12,7 +12,7 @@ def count_sixes(test_size):
     return number_sixes/test_size
 
 
-
+# Testing how to apply a function to each element of an array.
 # Create a NumPy array
 arr = np.array([1, 2, 3, 4, 5])
 
